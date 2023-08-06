@@ -40,9 +40,15 @@ namespace ChessChallenge.Application
                 controller.Update();
                 controller.Draw();
 
+                
+
                 Raylib.EndMode2D();
 
                 controller.DrawOverlay();
+
+
+                UIHelper.DrawTooltips();
+                
 
                 Raylib.EndDrawing();
             }

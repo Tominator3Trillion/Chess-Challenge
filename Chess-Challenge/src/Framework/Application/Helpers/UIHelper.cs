@@ -1,5 +1,6 @@
 ﻿using Raylib_cs;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using static ChessChallenge.Application.FileHelper;
 
@@ -76,7 +77,7 @@ namespace ChessChallenge.Application
             }
         }
 
-        public static bool Button(string text, Vector2 centre, Vector2 size)
+        public static bool Button(string text, Vector2 centre, Vector2 size, string tooltip = "")
         {
             Rectangle rec = new(centre.X - size.X / 2, centre.Y - size.Y / 2, size.X, size.Y);
 
@@ -85,6 +86,7 @@ namespace ChessChallenge.Application
             Color pressCol = new(2, 119, 173, 255);
 
             bool mouseOver = MouseInRect(rec);
+
             bool pressed = mouseOver && Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT);
             bool pressedThisFrame = pressed && Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT);
             Color col = mouseOver ? (pressed ? pressCol : hoverCol) : normalCol;
@@ -95,8 +97,55 @@ namespace ChessChallenge.Application
 
             DrawText(text, centre, fontSize, 1, textCol, AlignH.Centre);
 
+            if (tooltip != "" && mouseOver)
+            {
+                DrawTooltip(tooltip, new Vector2(centre.X, centre.Y - size.Y / 1.2f), ScaleInt(24), Color.WHITE, Color.BLACK);
+            }
+
             return pressedThisFrame;
         }
+
+        static List<(string text, Vector2 pos, int fontSize, Color colBox, Color colText)> tooltipsToRender = new();
+
+        //tooltip: white box black text
+        public static void DrawTooltip(string text, Vector2 pos, int fontSize, Color colBox, Color colText)
+        {
+            tooltipsToRender.Add((text, pos, fontSize, colBox, colText));
+        }
+
+        public static void DrawTooltips()
+        {
+            foreach((string text, Vector2 pos, int fontSize, Color colBox, Color colText) in tooltipsToRender)
+            {   
+                int textLength = ScaleInt(10 * text.Length);
+                int padding = ScaleInt(10);
+                int boxWidth = textLength + padding * 2;
+                int boxHeight = fontSize + padding * 2;
+                Rectangle rec = new(pos.X - boxWidth / 2, pos.Y - boxHeight / 2, boxWidth, boxHeight);
+                
+
+
+                Raylib.DrawRectangleRec(rec, colBox);
+                DrawText(text, pos, fontSize, 1, colText, AlignH.Centre);
+            }
+            tooltipsToRender.Clear();
+        }
+
+        public static void DrawLine(Vector2 start, Vector2 end, Color col, int thickness = 1)
+        {
+            Raylib.DrawLineEx(start, end, thickness, col);
+        }
+
+        public static void DrawSeperator(Vector2 centerPos, float length, Color col, int thickness = 1)
+        {
+            Vector2 start = new(centerPos.X - length / 2, centerPos.Y);
+            Vector2 end = new(centerPos.X + length / 2, centerPos.Y);
+            DrawLine(start, end, col, thickness);
+        }
+
+
+
+        
 
         static bool MouseInRect(Rectangle rec)
         {
